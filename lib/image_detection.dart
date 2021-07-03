@@ -64,7 +64,7 @@ class _ImageDetectionState extends State<ImageDetection> {
     });
     recognitions.forEach((element) {
       setState(() {
-        result += element["label"]+'\n';
+        result += element["label"] + '\n';
       });
     });
   }
