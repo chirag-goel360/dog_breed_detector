@@ -36,17 +36,25 @@ class _HomePageState extends State<HomePage> {
         items: [
           BottomNavigationBarItem(
             icon: Icon(
-              Icons.photo_camera_back,
+              Icons.image,
+              color: Colors.teal,
             ),
             label: 'Gallery',
           ),
           BottomNavigationBarItem(
             icon: Icon(
               Icons.photo_camera_front,
+              color: Colors.teal,
             ),
             label: 'Live Camera',
           ),
         ],
+        backgroundColor: Colors.green.shade50,
+        elevation: 5,
+        iconSize: 25,
+        selectedFontSize: 16,
+        unselectedFontSize: 16,
+        unselectedItemColor: Colors.red,
       ),
     );
   }

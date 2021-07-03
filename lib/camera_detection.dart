@@ -1,6 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:dog_breed_detector/main.dart';
 import 'package:flutter/material.dart';
+import 'package:tflite/tflite.dart';
 
 class CameraDetection extends StatefulWidget {
   @override
@@ -24,26 +25,60 @@ class _CameraDetectionState extends State<CameraDetection> {
       }
       setState(() {
         cameraController.startImageStream((image) => {
-            if (!isRunning)
-              {
-                isRunning = true,
-                imageCamera = image,
-                //runModelOnStreamFrames(),
-              },
-          });
+              if (!isRunning)
+                {
+                  isRunning = true,
+                  imageCamera = image,
+                  runModelOnStreamFrames(),
+                },
+            });
       });
     });
+  }
+
+  loadModel() async {
+    await Tflite.loadModel(
+      model: 'assets/model.tflite',
+      labels: 'assets/labels.txt',
+    );
   }
 
   @override
   void initState() {
     super.initState();
+    loadModel();
   }
 
   @override
-  void dispose() {
-    cameraController.dispose();
+  void dispose() async {
     super.dispose();
+    cameraController?.dispose();
+  }
+
+  runModelOnStreamFrames() async {
+    if (imageCamera != null) {
+      var recognitions = await Tflite.runModelOnFrame(
+        bytesList: imageCamera.planes.map((plane) {
+          return plane.bytes;
+        }).toList(),
+        imageHeight: imageCamera.height,
+        imageWidth: imageCamera.width,
+        imageMean: 127.5,
+        imageStd: 127.5,
+        rotation: 90,
+        numResults: 2,
+        threshold: 0.1,
+        asynch: true,
+      );
+      print(recognitions.length.toString());
+      result = "";
+      recognitions.forEach((element) {
+        setState(() {
+          result += element["label"] + '\n';
+        });
+      });
+      isRunning = false;
+    }
   }
 
   @override
@@ -63,8 +98,11 @@ class _CameraDetectionState extends State<CameraDetection> {
             children: [
               Center(
                 child: Container(
-                  height: 320,
-                  width: 360,
+                  margin: EdgeInsets.only(
+                    top: 100,
+                  ),
+                  height: 300,
+                  width: 330,
                   child: Image.asset(
                     'assets/frame.jpg',
                   ),
@@ -74,24 +112,26 @@ class _CameraDetectionState extends State<CameraDetection> {
                 child: TextButton(
                   child: Container(
                     margin: EdgeInsets.only(
-                      top: 35,
+                      top: 100,
                     ),
-                    height: 270,
-                    width: 360,
-                    child: imageCamera == null ? Container(
-                      height: 270,
-                      width: 360,
-                      child: Icon(
-                        Icons.photo_camera_back,
-                        color: Colors.blueAccent,
-                        size: 40,
-                      ),
-                    ) : AspectRatio(
-                      aspectRatio: cameraController.value.aspectRatio,
-                      child: CameraPreview(
-                        cameraController,
-                      ),
-                    ),
+                    height: 280,
+                    width: 240,
+                    child: imageCamera == null
+                        ? Container(
+                            height: 150,
+                            width: 200,
+                            child: Icon(
+                              Icons.photo_camera_back,
+                              color: Colors.blueAccent,
+                              size: 40,
+                            ),
+                          )
+                        : AspectRatio(
+                            aspectRatio: cameraController.value.aspectRatio,
+                            child: CameraPreview(
+                              cameraController,
+                            ),
+                          ),
                   ),
                   onPressed: () {
                     initializeCamera();
@@ -99,6 +139,24 @@ class _CameraDetectionState extends State<CameraDetection> {
                 ),
               ),
             ],
+          ),
+          Center(
+            child: Container(
+              margin: EdgeInsets.only(
+                top: 55,
+              ),
+              child: SingleChildScrollView(
+                child: Text(
+                  result,
+                  style: TextStyle(
+                    backgroundColor: Colors.white,
+                    fontSize: 25,
+                    color: Colors.black,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
           ),
         ],
       ),

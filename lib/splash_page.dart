@@ -11,7 +11,7 @@ class _SplashPageState extends State<SplashPage> {
   @override
   Widget build(BuildContext context) {
     return SplashScreen(
-      seconds: 7,
+      seconds: 5,
       navigateAfterSeconds: HomePage(),
       title: Text(
         'Dog Breed Detector',
@@ -26,12 +26,12 @@ class _SplashPageState extends State<SplashPage> {
       ),
       backgroundColor: Colors.blue.shade50,
       photoSize: 100,
-      loaderColor: Colors.red,
+      loaderColor: Colors.deepOrangeAccent,
       loadingText: Text(
         'From Chirag Goel',
         style: TextStyle(
           color: Colors.pinkAccent,
-          fontSize: 16,
+          fontSize: 18,
         ),
       ),
     );
